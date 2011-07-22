@@ -9,3 +9,7 @@ combine/
 compiled/
 gitstatus.log
 refreshCDN
+css_final
+js_final
+images
+*.bpkg

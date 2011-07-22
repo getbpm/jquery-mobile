@@ -17,6 +17,9 @@ nightly: DIR = jquery.mobile
 
 # The output folder for the finished files
 OUTPUT = compiled
+OUTPUT_FINAL_CSS     = css_final
+OUTPUT_FINAL_JS      = js_final
+OUTPUT_FINAL_IMAGES  = images
 
 # Command to remove the latest directory from the CDN before uploading, only if using latest target
 RMLATEST = echo ""
@@ -87,7 +90,7 @@ CSSFILES =    themes/default/jquery.mobile.theme.css \
 
 # By default, this is what get runs when make is called without any arguments.
 # Min and un-min CSS and JS files are the only things built
-all: init js min css cssmin notify
+all: init js min css cssmin images notify
 
 # Build the normal CSS file.
 css: init
@@ -98,7 +101,7 @@ css: init
 # Build the minified CSS file
 cssmin: init css
 	# Build the minified CSS file
-	@@java -jar build/yuicompressor-2.4.4.jar --type css ${OUTPUT}/${CSS} >> ${OUTPUT}/${CSSMIN}
+	@@java -jar build/yuicompressor-2.4.4.jar --type css ${OUTPUT}/${CSS} >> ${OUTPUT_FINAL_CSS}/${CSSMIN}
 
 # Build the normal JS file
 js: init
@@ -112,12 +115,20 @@ init:
 	@@rm -rf ${OUTPUT}
 	@@mkdir ${OUTPUT}
 
+	@@rm -rf ${OUTPUT_FINAL_CSS}
+	@@mkdir ${OUTPUT_FINAL_CSS}
+
+	@@rm -rf ${OUTPUT_FINAL_JS}
+	@@mkdir ${OUTPUT_FINAL_JS}
+
+	@@rm -rf images
+
 # Build the minified JS file
 min: init js
 	# Build the minified JavaScript file
 	@@head -8 js/jquery.mobile.core.js | ${SED_VER} > ${OUTPUT}/${MIN}
 	@@java -jar build/google-compiler-20110405.jar --js ${OUTPUT}/${JS} --warning_level QUIET --js_output_file ${MIN}.tmp
-	@@cat ${MIN}.tmp >> ${OUTPUT}/${MIN}
+	@@cat ${MIN}.tmp >> ${OUTPUT_FINAL_JS}/${MIN}
 	@@rm -f ${MIN}.tmp
 
 # Let the user know the files were built and where they are
@@ -128,6 +139,10 @@ notify:
 pull: 
 	@@git pull --quiet
 
+# Images
+images: init
+	@@cp -r themes/default/images .
+  
 # Zip the 4 files and the theme images into one convenient package
 zip: init js min css cssmin
 	@@mkdir -p ${DIR}
